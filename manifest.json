@@ -1,0 +1,37 @@
+{
+  "name": "ScribbleSpeak - Handwriting to Speech PWA",
+  "short_name": "ScribbleSpeak",
+  "description": "Convert handwriting into speech using state-of-the-art drawing canvas and real-time offline speech synthesis.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#070a13",
+  "theme_color": "#070a13",
+  "orientation": "any",
+  "categories": ["utilities", "productivity", "accessibility"],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
