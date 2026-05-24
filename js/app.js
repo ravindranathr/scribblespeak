@@ -71,6 +71,27 @@ document.addEventListener('DOMContentLoaded', () => {
   handleNetworkChange(navigator.onLine);
   updateCanvasControlState();
 
+  // iOS Speech Unlocker: iOS Safari blocks asynchronous text-to-speech triggered by timers.
+  // We unlock the audio context by playing a brief silent utterance on the very first user touch/click.
+  const unlockIOSSpeech = () => {
+    try {
+      const silentUtterance = new SpeechSynthesisUtterance(' ');
+      silentUtterance.volume = 0;
+      window.speechSynthesis.speak(silentUtterance);
+      
+      // Remove listeners once successfully unlocked
+      window.removeEventListener('touchstart', unlockIOSSpeech);
+      window.removeEventListener('pointerdown', unlockIOSSpeech);
+      window.removeEventListener('mousedown', unlockIOSSpeech);
+      console.log('iOS Speech Engine successfully unlocked.');
+    } catch (e) {
+      console.warn('Speech unlock failed:', e);
+    }
+  };
+  window.addEventListener('touchstart', unlockIOSSpeech);
+  window.addEventListener('pointerdown', unlockIOSSpeech);
+  window.addEventListener('mousedown', unlockIOSSpeech);
+
   // --- 2. Hardcoded Text-To-Speech Engine ---
 
   const startSpeech = (textToSpeak) => {
