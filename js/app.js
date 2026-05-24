@@ -80,11 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(autoRecognizeTimer);
     }
     
-    // If auto-recognize is enabled, trigger translation 4.0s after drawing stops
+    // If auto-recognize is enabled, trigger translation 2.0s after drawing stops
     if (isAutoRecognizeEnabled) {
       autoRecognizeTimer = setTimeout(() => {
         triggerRecognition();
-      }, 4000);
+      }, 2000);
     }
   };
 
