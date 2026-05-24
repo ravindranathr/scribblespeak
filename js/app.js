@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const visualizerStatusDot = document.getElementById('visualizer-status-dot');
     
   // Settings Drawer Toggle Controls
-  const btnOpenSettings = document.getElementById('btn-open-settings');
-  const btnCloseSettings = document.getElementById('btn-close-settings');
+  const btnOpenDrawer = document.getElementById('btn-open-drawer');
+  const btnCloseDrawer = document.getElementById('btn-close-drawer');
   const settingsDrawer = document.getElementById('settings-drawer');
   
   // --- State Variables ---
@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
     drawerOverlay.className = 'drawer-overlay';
     document.body.appendChild(drawerOverlay);
 
-    btnOpenSettings.addEventListener('click', () => {
+    btnOpenDrawer.addEventListener('click', () => {
       settingsDrawer.classList.add('open');
       drawerOverlay.classList.add('open');
     });
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
       drawerOverlay.classList.remove('open');
     };
 
-    btnCloseSettings.addEventListener('click', closeSettings);
+    btnCloseDrawer.addEventListener('click', closeSettings);
     drawerOverlay.addEventListener('click', closeSettings);
 
   // Copy recognized text

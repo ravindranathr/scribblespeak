@@ -39,9 +39,9 @@
         <i class="fas fa-download"></i> Install App
       </button>
       
-      <!-- Open Settings Drawer Button -->
-      <button id="btn-open-settings" class="btn" title="Open App Settings">
-        <i class="fas fa-cog"></i> Settings
+      <!-- Unified Open Drawer Trigger -->
+      <button id="btn-open-drawer" class="btn btn-primary" title="Open Reader & Settings">
+        <i class="fas fa-volume-up"></i> Reader & Settings
       </button>
       
       <!-- Network Connection Badge -->
@@ -52,15 +52,15 @@
     </div>
   </header>
 
-  <!-- Main Grid App Container -->
+  <!-- Main 100% Width Canvas App Container -->
   <main class="app-container">
     
-    <!-- LEFT PANEL: Handwriting Workspace (Bigger Canvas!) -->
+    <!-- LEFT PANEL: Handwriting Workspace (100% Full Screen Canvas!) -->
     <section class="panel" id="handwriting-panel">
       <div class="panel-header">
         <div class="panel-title">
           <i class="fas fa-pen-fancy"></i>
-          <span>Handwriting Workspace</span>
+          <span>Handwriting Canvas</span>
         </div>
         
         <div class="toolbar">
@@ -76,7 +76,7 @@
         </div>
       </div>
       
-      <!-- The Drawing Canvas (Lighter paper-grid style default!) -->
+      <!-- The Drawing Canvas -->
       <div class="canvas-container ruled-paper" id="canvas-container-box">
         <canvas id="drawing-canvas"></canvas>
         
@@ -111,22 +111,29 @@
         </div>
       </div>
     </section>
-    
-    <!-- RIGHT PANEL: Reader & Speech Control Dashboard -->
-    <section class="panel" id="speech-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <i class="fas fa-volume-up"></i>
-          <span>Voice Reader Engine</span>
-        </div>
+  </main>
+
+  <!-- Unified Slide-out Settings & Reader Drawer -->
+  <div id="settings-drawer" class="settings-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <i class="fas fa-volume-up"></i>
+        <span>Reader & Settings</span>
       </div>
+      <button id="btn-close-drawer" class="btn-close-drawer" title="Close Drawer">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="drawer-content">
       
-      <div class="reader-container">
+      <!-- Section 1: Transcribed Document & Reader -->
+      <div class="settings-section">
+        <h3><i class="fas fa-file-alt"></i> Transcribed Document</h3>
         
-        <!-- Editable Text Area with Highlights Overlay -->
         <div class="text-editor-container">
           <div class="text-editor-label">
-            <span>Transcribed Document Text</span>
+            <span>Text Output Editor</span>
             <div class="text-editor-actions">
               <button id="btn-copy" title="Copy Text to Clipboard">
                 <i class="far fa-copy"></i> Copy
@@ -144,9 +151,9 @@
           </div>
         </div>
         
-        <!-- Play / Pause / Stop buttons -->
+        <!-- Speech Buttons -->
         <div class="control-buttons-grid">
-          <button id="btn-speak" class="btn btn-primary" style="padding: 0.75rem 1rem;">
+          <button id="btn-speak" class="btn btn-primary" style="padding: 0.65rem 0.85rem;">
             <i class="fas fa-play"></i> Speak Aloud
           </button>
           <button id="btn-pause" class="btn" style="border: 1px solid var(--border-light); background: var(--bg-control);" disabled>
@@ -157,7 +164,7 @@
           </button>
         </div>
 
-        <!-- Speech Audio Visualizer -->
+        <!-- Speech Visualizer -->
         <div class="visualizer-card">
           <div class="visualizer-status">
             <span id="visualizer-status-dot" class="status-dot"></span>
@@ -176,26 +183,9 @@
             <div class="soundwave-bar"></div>
           </div>
         </div>
-        
       </div>
-    </section>
-  </main>
 
-  <!-- Settings Drawer Panel -->
-  <div id="settings-drawer" class="settings-drawer">
-    <div class="drawer-header">
-      <div class="drawer-title">
-        <i class="fas fa-sliders-h"></i>
-        <span>App Settings</span>
-      </div>
-      <button id="btn-close-settings" class="btn-close-drawer" title="Close Settings">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    
-    <div class="drawer-content">
-      
-      <!-- Section 1: Handwriting Styles -->
+      <!-- Section 2: Handwriting Options -->
       <div class="settings-section">
         <h3><i class="fas fa-pen-fancy"></i> Handwriting Options</h3>
         
@@ -227,7 +217,7 @@
         </div>
         
         <div class="settings-row">
-          <label for="paper-grid">Paper Background grid</label>
+          <label for="paper-grid">Paper Background Grid</label>
           <select id="paper-grid" class="custom-select">
             <option value="ruled-paper" selected>Ruled Notepad</option>
             <option value="dot-grid">Dot Matrix</option>
@@ -236,19 +226,19 @@
         </div>
       </div>
       
-      <!-- Section 2: Speech Synthesizer -->
+      <!-- Section 3: Voice Synth Settings -->
       <div class="settings-section">
         <h3><i class="fas fa-volume-up"></i> Voice Reader Settings</h3>
         
         <div class="settings-row">
-          <label for="voice-select">Synthesizer Voice</label>
+          <label for="voice-select">Speech Synthesizer Voice</label>
           <select id="voice-select" class="custom-select">
             <option>Loading system voices...</option>
           </select>
         </div>
         
         <div class="settings-row">
-          <label for="rate-slider">Speed Speed <span id="rate-value">1x</span></label>
+          <label for="rate-slider">Speed speed <span id="rate-value">1x</span></label>
           <input type="range" id="rate-slider" min="0.5" max="2.5" step="0.1" value="1">
         </div>
         
