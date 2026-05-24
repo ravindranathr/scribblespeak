@@ -1,65 +1,32 @@
 /*
  * Core Application Controller
- * Coordinates Drawing Canvas, Handwriting Recognition Engines, and Text-to-Speech Utilities.
- * Implements scroll-synchronized backdrop word highlighting, responsive voice settings, and custom animations.
+ * Coordinates Handwriting Canvas and Handwriting Recognition Engines.
+ * Directly translates recognized calligraphy into speech utilizing hardcoded 
+ * text-to-speech settings (Microsoft Heera voice, Speed 1.0, Pitch 1.0, Volume 1.0).
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   // --- DOM Elements ---
   const canvasEl = document.getElementById('drawing-canvas');
   const canvasContainer = document.getElementById('canvas-container-box');
-  const textEditor = document.getElementById('text-editor');
-  const textHighlights = document.getElementById('text-highlights');
   
   // Canvas Toolbar Controls
   const btnUndo = document.getElementById('btn-undo');
   const btnRedo = document.getElementById('btn-redo');
   const btnClear = document.getElementById('btn-clear');
   const penColorDots = document.querySelectorAll('.color-dot');
-  const penWidthSelect = document.getElementById('pen-width');
-  const paperGridSelect = document.getElementById('paper-grid');
   
   // App Toolbar Settings
-  const languageSelect = document.getElementById('language-select');
   const autoRecognizeToggle = document.getElementById('auto-recognize-toggle');
   const btnRecognize = document.getElementById('btn-recognize');
   const networkBadge = document.getElementById('network-badge');
   const networkStatusText = document.getElementById('network-status-text');
-  
-  // Text-To-Speech Controls
-  const btnSpeak = document.getElementById('btn-speak');
-  const btnPause = document.getElementById('btn-pause');
-  const btnStop = document.getElementById('btn-stop');
-  const voiceSelect = document.getElementById('voice-select');
-  const rateSlider = document.getElementById('rate-slider');
-  const rateValue = document.getElementById('rate-value');
-  const pitchSlider = document.getElementById('pitch-slider');
-  const pitchValue = document.getElementById('pitch-value');
-  const volumeSlider = document.getElementById('volume-slider');
-  const volumeValue = document.getElementById('volume-value');
-  const copyBtn = document.getElementById('btn-copy');
-  
-  // Speech Visualizer
-  const visualizerWave = document.getElementById('speech-wave');
-  const visualizerStatus = document.getElementById('visualizer-status-text');
-  const visualizerStatusDot = document.getElementById('visualizer-status-dot');
-    
-  // Settings Drawer Toggle Controls
-  const btnOpenDrawer = document.getElementById('btn-open-drawer');
-  const btnCloseDrawer = document.getElementById('btn-close-drawer');
-  const settingsDrawer = document.getElementById('settings-drawer');
   
   // --- State Variables ---
   let canvas = null;
   let recognizer = null;
   let autoRecognizeTimer = null;
   let isAutoRecognizeEnabled = true;
-  
-  // Speech state
-  let currentUtterance = null;
-  let isSpeaking = false;
-  let isPaused = false;
-  let systemVoices = [];
 
   // --- 1. Initialize Core Components ---
   
@@ -85,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(autoRecognizeTimer);
     }
     
-    // If auto-recognize is enabled, trigger translation 2.0s after drawing stops
+    // Trigger translation 2.0s after drawing stops
     if (isAutoRecognizeEnabled) {
       autoRecognizeTimer = setTimeout(() => {
         triggerRecognition();
@@ -93,238 +60,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Initialize Modules
+  // Initialize Canvas and Recognizer
   canvas = new window.HandwritingCanvas(canvasEl, canvasContainer, handleStrokeEnd);
   canvas.setPaperType('ruled-paper'); // Ensure lighter ruled paper starts by default!
+  canvas.setPenWidth(4);              // Standard medium calligraphy brush size
+  
   recognizer = new window.HandwritingRecognizer(handleNetworkChange);
   
   // Check initial connection status
   handleNetworkChange(navigator.onLine);
   updateCanvasControlState();
 
-  // --- 2. Scroll-Synchronized Highlight Backdrop ---
-  
-  // Keep Textarea and Background Highlight div scrolls aligned 100% of the time
-  textEditor.addEventListener('scroll', () => {
-    textHighlights.scrollTop = textEditor.scrollTop;
-    textHighlights.scrollLeft = textEditor.scrollLeft;
-  });
+  // --- 2. Hardcoded Text-To-Speech Engine ---
 
-  // Re-split and format characters into word blocks when user types or text changes
-  const updateHighlightBackdrop = () => {
-    const text = textEditor.value;
-    
-    // Split keeping whitespaces so text structure matches exactly
-    const wordTokens = text.split(/(\s+)/);
-    let charOffset = 0;
-    
-    const formattedHtml = wordTokens.map(token => {
-      if (/\s+/.test(token)) {
-        // Whitespace token
-        charOffset += token.length;
-        return token;
-      } else {
-        // Word token
-        const start = charOffset;
-        const end = charOffset + token.length;
-        charOffset += token.length;
-        return `<span class="word-span" data-start="${start}" data-end="${end}">${escapeHtml(token)}</span>`;
-      }
-    }).join('');
-    
-    textHighlights.innerHTML = formattedHtml;
-  };
+  const startSpeech = (textToSpeak) => {
+    if (!textToSpeak) return;
 
-  textEditor.addEventListener('input', updateHighlightBackdrop);
+    // Cancel any active speech playback
+    window.speechSynthesis.cancel();
 
-  function escapeHtml(string) {
-    return string
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  // --- 3. Speech Synthesis Controls ---
-
-  // Populate System Voices matching selected PWA language
-  const populateVoiceList = () => {
-    if (typeof speechSynthesis === 'undefined') return;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
-    systemVoices = window.speechSynthesis.getVoices();
-    const currentLang = languageSelect.value;
+    // Hardcoded Speech Settings:
+    utterance.volume = 1.0; // 100% Volume
+    utterance.pitch = 1.0;  // Standard Pitch Tone
+    utterance.rate = 1.0;   // Normal Speed Rate
+
+    // Fetch System Voices to find Microsoft Heera
+    const systemVoices = window.speechSynthesis.getVoices();
     
-    // Filter voices that support the current selected language
-    // e.g. language 'en' should match 'en-US', 'en-GB', etc.
-    let matchingVoices = systemVoices.filter(voice => 
-      voice.lang.toLowerCase().startsWith(currentLang.toLowerCase())
+    // Look for Microsoft Heera (case-insensitive search)
+    const heeraVoice = systemVoices.find(voice => 
+      voice.name.toLowerCase().includes('heera')
     );
-    
-    // Fallback to all voices if no exact matches exist
-    if (matchingVoices.length === 0) {
-      matchingVoices = systemVoices;
-    }
-    
-    voiceSelect.innerHTML = '';
-    
-    matchingVoices.forEach((voice, index) => {
-      const option = document.createElement('option');
-      option.textContent = `${voice.name} (${voice.lang})${voice.default ? ' [Default]' : ''}`;
-      option.value = voice.name;
-      
-      // Select browser default if available
-      if (voice.default) {
-        option.selected = true;
-      }
-      voiceSelect.appendChild(option);
-    });
 
-    if (voiceSelect.options.length === 0 && systemVoices.length > 0) {
-      // Fallback
-      systemVoices.forEach(voice => {
-        const option = document.createElement('option');
-        option.textContent = `${voice.name} (${voice.lang})`;
-        option.value = voice.name;
-        voiceSelect.appendChild(option);
-      });
+    if (heeraVoice) {
+      utterance.voice = heeraVoice;
+      console.log('Selected Heera voice successfully.');
+    } else {
+      // Fallback: search for any English voice, or use first system voice
+      const englishVoice = systemVoices.find(voice => 
+        voice.lang.toLowerCase().startsWith('en')
+      );
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+      console.warn('Microsoft Heera voice not found on this system. Falling back to default English voice.');
     }
+
+    utterance.onstart = () => {
+      console.log('Speaking:', textToSpeak);
+    };
+
+    window.speechSynthesis.speak(utterance);
   };
 
-  // Wait for voices to load (different browsers load them asynchronously)
-  if (typeof speechSynthesis !== 'undefined') {
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = populateVoiceList;
-    }
-    populateVoiceList();
+  // Ensure voices are fetched loaded asynchronously (crucial for Chrome/Edge)
+  if (typeof speechSynthesis !== 'undefined' && window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      // Warm up the speech voices pool
+      window.speechSynthesis.getVoices();
+    };
   }
 
-  // Speak Logic
-  const startSpeech = (customText = null, charOffset = 0) => {
-    const textToSpeak = customText !== null ? customText.trim() : textEditor.value.trim();
-    if (!textToSpeak) {
-      if (customText === null) {
-        showToast('Text area is empty. Draw or type something first!', 'info');
-      }
-      return;
-    }
-
-    // Cancel active playback
-    window.speechSynthesis.cancel();
-    resetHighlightState();
-
-    currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
-    
-    // Apply Settings
-    const selectedVoiceName = voiceSelect.value;
-    const selectedVoice = systemVoices.find(voice => voice.name === selectedVoiceName);
-    if (selectedVoice) {
-      currentUtterance.voice = selectedVoice;
-    }
-    
-    currentUtterance.rate = parseFloat(rateSlider.value);
-    currentUtterance.pitch = parseFloat(pitchSlider.value);
-    currentUtterance.volume = parseFloat(volumeSlider.value);
-    
-    // Core Boundary Callback - Word Highlighting in real-time!
-    currentUtterance.onboundary = (e) => {
-      if (e.name !== 'word') return;
-      const charIndex = charOffset + e.charIndex;
-      
-      const spans = textHighlights.querySelectorAll('.word-span');
-      spans.forEach(span => {
-        const start = parseInt(span.getAttribute('data-start'));
-        const end = parseInt(span.getAttribute('data-end'));
-        
-        if (charIndex >= start && charIndex < end) {
-          span.classList.add('highlighted');
-          // Smooth scroll active word to view in editor
-          span.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-          span.classList.remove('highlighted');
-        }
-      });
-    };
-
-    currentUtterance.onstart = () => {
-      isSpeaking = true;
-      isPaused = false;
-      toggleVisualizer(true, 'Speaking...');
-      btnSpeak.disabled = true;
-      btnPause.disabled = false;
-      btnStop.disabled = false;
-    };
-
-    currentUtterance.onend = () => {
-      isSpeaking = false;
-      isPaused = false;
-      toggleVisualizer(false, 'Speech Finished');
-      btnSpeak.disabled = false;
-      btnPause.disabled = true;
-      btnStop.disabled = true;
-      resetHighlightState();
-    };
-
-    currentUtterance.onerror = (e) => {
-      if (e.error !== 'interrupted') {
-        console.error('Speech synthesis error:', e);
-        showToast('Speech engine error occurred.', 'error');
-      }
-      isSpeaking = false;
-      isPaused = false;
-      toggleVisualizer(false, 'Speech Error');
-      btnSpeak.disabled = false;
-      btnPause.disabled = true;
-      btnStop.disabled = true;
-      resetHighlightState();
-    };
-
-    window.speechSynthesis.speak(currentUtterance);
-  };
-
-  const pauseSpeech = () => {
-    if (isSpeaking && !isPaused) {
-      window.speechSynthesis.pause();
-      isPaused = true;
-      toggleVisualizer(false, 'Paused');
-      btnPause.innerHTML = '<i class="fas fa-play"></i> Resume';
-    } else if (isSpeaking && isPaused) {
-      window.speechSynthesis.resume();
-      isPaused = false;
-      toggleVisualizer(true, 'Speaking...');
-      btnPause.innerHTML = '<i class="fas fa-pause"></i> Pause';
-    }
-  };
-
-  const stopSpeech = () => {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-    isPaused = false;
-    toggleVisualizer(false, 'Stopped');
-    btnSpeak.disabled = false;
-    btnPause.disabled = true;
-    btnPause.innerHTML = '<i class="fas fa-pause"></i> Pause';
-    btnStop.disabled = true;
-    resetHighlightState();
-  };
-
-  const resetHighlightState = () => {
-    const spans = textHighlights.querySelectorAll('.word-span');
-    spans.forEach(span => span.classList.remove('highlighted'));
-  };
-
-  const toggleVisualizer = (active, statusText) => {
-    visualizerStatus.textContent = statusText;
-    if (active) {
-      visualizerWave.classList.add('animating');
-      visualizerStatusDot.classList.add('active');
-    } else {
-      visualizerWave.classList.remove('animating');
-      visualizerStatusDot.classList.remove('active');
-    }
-  };
-
-  // --- 4. Call Handwriting Recognition ---
+  // --- 3. Call Handwriting Recognition ---
   const triggerRecognition = async () => {
     if (canvas.isEmpty()) {
       return;
@@ -334,65 +133,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalBtnText = btnRecognize.innerHTML;
     btnRecognize.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
 
-    const selectedLang = languageSelect.value;
+    // Default recognition language set to English
+    const selectedLang = 'en';
     
     // Offline status feedback callback
     const handleProgress = (progress) => {
-      visualizerStatus.textContent = progress.message;
-      if (progress.status === 'processing') {
-        visualizerStatusDot.classList.add('active');
-      }
+      console.log('OCR progress:', progress.message);
     };
 
     try {
       const textResult = await recognizer.recognize(canvas, selectedLang, handleProgress);
       
       if (textResult) {
-        // Retrieve current editor contents
-        const currentText = textEditor.value;
-        let startIndex = 0;
+        // Visual confirmation of the transcribed text via minimal toast
+        showToast(`Spoken: "${textResult}"`, 'success');
         
-        // Formulate spacing nicely
-        if (currentText === '') {
-          textEditor.value = textResult;
-          startIndex = 0;
-        } else {
-          // If there is existing text, append with a space
-          const needsSpace = !currentText.endsWith(' ');
-          textEditor.value = needsSpace ? currentText + ' ' + textResult : currentText + textResult;
-          startIndex = currentText.length + (needsSpace ? 1 : 0);
-        }
-        
-        // Sync highlights backdrop and trigger scrolling
-        updateHighlightBackdrop();
-        textEditor.scrollTop = textEditor.scrollHeight;
-        textHighlights.scrollTop = textHighlights.scrollHeight;
-        
-        showToast('Handwriting added to reader.', 'info');
-        
-        // Auto convert to speech once text is detected!
-        startSpeech(textResult, startIndex);
+        // Auto convert to speech immediately!
+        startSpeech(textResult);
       }
       
       // Auto clear the canvas so the user can draw next block
       canvas.clear();
       updateCanvasControlState();
       
-      if (!recognizer.isOnline) {
-        visualizerStatus.textContent = 'Idle';
-        visualizerStatusDot.classList.remove('active');
-      }
     } catch (err) {
       showToast(err.message, 'error');
-      visualizerStatus.textContent = 'Idle';
-      visualizerStatusDot.classList.remove('active');
     } finally {
       btnRecognize.disabled = false;
       btnRecognize.innerHTML = originalBtnText;
     }
   };
 
-  // --- 5. Event Listeners Coordination ---
+  // --- 4. Event Listeners Coordination ---
 
   // Recognition manual trigger
   btnRecognize.addEventListener('click', triggerRecognition);
@@ -415,15 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Canvas cleared.', 'info');
   });
 
-  // Pen Options
-  penWidthSelect.addEventListener('change', (e) => {
-    canvas.setPenWidth(parseInt(e.target.value));
-  });
-
-  paperGridSelect.addEventListener('change', (e) => {
-    canvas.setPaperType(e.target.value);
-  });
-
+  // Pen Ink Selector
   penColorDots.forEach(dot => {
     dot.addEventListener('click', (e) => {
       // Remove active from others
@@ -434,12 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const selectedColor = e.target.getAttribute('data-color');
       canvas.setPenColor(selectedColor);
     });
-  });
-
-  // Language Change reloads voice configurations
-  languageSelect.addEventListener('change', () => {
-    populateVoiceList();
-    showToast(`Recognition language changed to ${languageSelect.options[languageSelect.selectedIndex].text}`, 'info');
   });
 
   // Auto Recognize Toggle
@@ -453,52 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Text-To-Speech Triggers
-  btnSpeak.addEventListener('click', startSpeech);
-  btnPause.addEventListener('click', pauseSpeech);
-  btnStop.addEventListener('click', stopSpeech);
-
-  // Settings Sliders
-  rateSlider.addEventListener('input', (e) => {
-    rateValue.textContent = `${e.target.value}x`;
-  });
-  pitchSlider.addEventListener('input', (e) => {
-    pitchValue.textContent = e.target.value;
-  });
-  volumeSlider.addEventListener('input', (e) => {
-    volumeValue.textContent = Math.round(e.target.value * 100) + '%';
-  });
-
-    // Settings Drawer Open/Close Events
-    const drawerOverlay = document.createElement('div');
-    drawerOverlay.className = 'drawer-overlay';
-    document.body.appendChild(drawerOverlay);
-
-    btnOpenDrawer.addEventListener('click', () => {
-      settingsDrawer.classList.add('open');
-      drawerOverlay.classList.add('open');
-    });
-
-    const closeSettings = () => {
-      settingsDrawer.classList.remove('open');
-      drawerOverlay.classList.remove('open');
-    };
-
-    btnCloseDrawer.addEventListener('click', closeSettings);
-    drawerOverlay.addEventListener('click', closeSettings);
-
-  // Copy recognized text
-  copyBtn.addEventListener('click', () => {
-    const text = textEditor.value;
-    if (!text) {
-      showToast('Nothing to copy!', 'warning');
-      return;
-    }
-    navigator.clipboard.writeText(text)
-      .then(() => showToast('Text copied to clipboard!', 'success'))
-      .catch(() => showToast('Failed to copy text.', 'error'));
-  });
-
   // Update Undo/Redo button disable states dynamically
   function updateCanvasControlState() {
     btnUndo.disabled = canvas.strokes.length === 0;
@@ -506,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnRecognize.disabled = canvas.strokes.length === 0;
   }
 
-  // --- 6. Toast Notifications Utilities ---
+  // --- 5. Toast Notifications Utilities ---
   function showToast(message, type = 'info') {
     let container = document.querySelector('.toast-container');
     if (!container) {
