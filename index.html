@@ -7,7 +7,7 @@
   
   <!-- SEO Meta Tags -->
   <meta name="description" content="A premium Progressive Web App (PWA) that converts handwriting into speech using state-of-the-art canvas drawing, real-time handwriting recognition APIs, and local offline text-to-speech with word highlighting.">
-  <meta name="theme-color" content="#070a13">
+  <meta name="theme-color" content="#f8fafc">
   
   <!-- PWA Manifest & Icons -->
   <link rel="manifest" href="manifest.json">
@@ -39,6 +39,11 @@
         <i class="fas fa-download"></i> Install App
       </button>
       
+      <!-- Open Settings Drawer Button -->
+      <button id="btn-open-settings" class="btn" title="Open App Settings">
+        <i class="fas fa-cog"></i> Settings
+      </button>
+      
       <!-- Network Connection Badge -->
       <div id="network-badge" class="status-badge online">
         <span class="badge-indicator"></span>
@@ -50,32 +55,15 @@
   <!-- Main Grid App Container -->
   <main class="app-container">
     
-    <!-- LEFT PANEL: Handwriting Workspace -->
+    <!-- LEFT PANEL: Handwriting Workspace (Bigger Canvas!) -->
     <section class="panel" id="handwriting-panel">
       <div class="panel-header">
         <div class="panel-title">
           <i class="fas fa-pen-fancy"></i>
-          <span>Handwriting Canvas</span>
+          <span>Handwriting Workspace</span>
         </div>
         
         <div class="toolbar">
-          <!-- Language Selector -->
-          <div class="btn-group" style="border: none;">
-            <select id="language-select" class="custom-select" style="padding: 0.5rem 0.85rem; border-radius: 12px;">
-              <option value="en" selected>English</option>
-              <option value="es">Español (Spanish)</option>
-              <option value="fr">Français (French)</option>
-              <option value="de">Deutsch (German)</option>
-              <option value="it">Italiano (Italian)</option>
-              <option value="pt">Português (Portuguese)</option>
-              <option value="ru">Русский (Russian)</option>
-              <option value="zh">中文 (Chinese)</option>
-              <option value="ja">日本語 (Japanese)</option>
-              <option value="hi">हिन्दी (Hindi)</option>
-              <option value="ar">العربية (Arabic)</option>
-            </select>
-          </div>
-
           <!-- Auto Recognition Toggler -->
           <button id="auto-recognize-toggle" class="btn active" title="Convert handwriting automatically when you pause writing">
             <i class="fas fa-magic"></i> Auto Convert
@@ -88,11 +76,11 @@
         </div>
       </div>
       
-      <!-- The Drawing Canvas -->
-      <div class="canvas-container slate-dark" id="canvas-container-box">
+      <!-- The Drawing Canvas (Lighter paper-grid style default!) -->
+      <div class="canvas-container ruled-paper" id="canvas-container-box">
         <canvas id="drawing-canvas"></canvas>
         
-        <!-- Hover Overlay Canvas Controls -->
+        <!-- Hover Overlay Canvas Controls (Ultra Clean & Minimalist!) -->
         <div class="canvas-overlay-controls">
           
           <!-- Subtle Ink Palette -->
@@ -105,32 +93,7 @@
             <div class="color-dot" data-color="#4b5563" style="background: #4b5563;" title="Charcoal Grey"></div>
           </div>
           
-          <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15);"></div>
-          
-          <!-- Pen Thickness -->
-          <div style="display: flex; align-items: center; gap: 0.3rem;">
-            <i class="fas fa-paint-brush" style="font-size: 0.8rem; color: var(--text-secondary);"></i>
-            <select id="pen-width" title="Brush Size">
-              <option value="2">Fine</option>
-              <option value="4" selected>Medium</option>
-              <option value="7">Thick</option>
-              <option value="12">Bold</option>
-            </select>
-          </div>
-          
-          <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15);"></div>
-          
-          <!-- Paper Background Selection -->
-          <div style="display: flex; align-items: center; gap: 0.3rem;">
-            <i class="fas fa-file-alt" style="font-size: 0.8rem; color: var(--text-secondary);"></i>
-            <select id="paper-grid" title="Paper Style">
-              <option value="slate-dark" selected>Slate Canvas</option>
-              <option value="dot-grid">Dot Matrix</option>
-              <option value="ruled-paper">Ruled Notepad</option>
-            </select>
-          </div>
-
-          <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15);"></div>
+          <div style="width: 1px; height: 20px; background: rgba(15, 23, 42, 0.08);"></div>
           
           <!-- Undo / Redo / Clear Actions -->
           <div style="display: flex; gap: 0.25rem;">
@@ -214,41 +177,94 @@
           </div>
         </div>
         
-        <!-- Speech Synthesizer Control Settings -->
-        <div class="settings-group">
-          
-          <!-- Voice Selector -->
-          <div class="settings-row">
-            <label for="voice-select">Synthesizer Voice Voice</label>
-            <select id="voice-select" class="custom-select">
-              <!-- Dynamically populated from JS -->
-              <option>Loading system voices...</option>
-            </select>
-          </div>
-          
-          <!-- Speed Rate Slider -->
-          <div class="settings-row">
-            <label for="rate-slider">Speed Speed <span id="rate-value">1x</span></label>
-            <input type="range" id="rate-slider" min="0.5" max="2.5" step="0.1" value="1">
-          </div>
-          
-          <!-- Pitch Slider -->
-          <div class="settings-row">
-            <label for="pitch-slider">Pitch Tone <span id="pitch-value">1</span></label>
-            <input type="range" id="pitch-slider" min="0.5" max="2" step="0.1" value="1">
-          </div>
-          
-          <!-- Volume Slider -->
-          <div class="settings-row">
-            <label for="volume-slider">Volume Level <span id="volume-value">100%</span></label>
-            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1">
-          </div>
-          
-        </div>
-        
       </div>
     </section>
   </main>
+
+  <!-- Settings Drawer Panel -->
+  <div id="settings-drawer" class="settings-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <i class="fas fa-sliders-h"></i>
+        <span>App Settings</span>
+      </div>
+      <button id="btn-close-settings" class="btn-close-drawer" title="Close Settings">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="drawer-content">
+      
+      <!-- Section 1: Handwriting Styles -->
+      <div class="settings-section">
+        <h3><i class="fas fa-pen-fancy"></i> Handwriting Options</h3>
+        
+        <div class="settings-row">
+          <label for="language-select">Recognition Language</label>
+          <select id="language-select" class="custom-select">
+            <option value="en" selected>English</option>
+            <option value="es">Español (Spanish)</option>
+            <option value="fr">Français (French)</option>
+            <option value="de">Deutsch (German)</option>
+            <option value="it">Italiano (Italian)</option>
+            <option value="pt">Português (Portuguese)</option>
+            <option value="ru">Русский (Russian)</option>
+            <option value="zh">中文 (Chinese)</option>
+            <option value="ja">日本語 (Japanese)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="ar">العربية (Arabic)</option>
+          </select>
+        </div>
+        
+        <div class="settings-row">
+          <label for="pen-width">Pen Thickness Size</label>
+          <select id="pen-width" class="custom-select">
+            <option value="2">Fine</option>
+            <option value="4" selected>Medium</option>
+            <option value="7">Thick</option>
+            <option value="12">Bold</option>
+          </select>
+        </div>
+        
+        <div class="settings-row">
+          <label for="paper-grid">Paper Background grid</label>
+          <select id="paper-grid" class="custom-select">
+            <option value="ruled-paper" selected>Ruled Notepad</option>
+            <option value="dot-grid">Dot Matrix</option>
+            <option value="slate-dark">Slate Canvas</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Section 2: Speech Synthesizer -->
+      <div class="settings-section">
+        <h3><i class="fas fa-volume-up"></i> Voice Reader Settings</h3>
+        
+        <div class="settings-row">
+          <label for="voice-select">Synthesizer Voice</label>
+          <select id="voice-select" class="custom-select">
+            <option>Loading system voices...</option>
+          </select>
+        </div>
+        
+        <div class="settings-row">
+          <label for="rate-slider">Speed Speed <span id="rate-value">1x</span></label>
+          <input type="range" id="rate-slider" min="0.5" max="2.5" step="0.1" value="1">
+        </div>
+        
+        <div class="settings-row">
+          <label for="pitch-slider">Pitch Tone <span id="pitch-value">1</span></label>
+          <input type="range" id="pitch-slider" min="0.5" max="2" step="0.1" value="1">
+        </div>
+        
+        <div class="settings-row">
+          <label for="volume-slider">Volume Level <span id="volume-value">100%</span></label>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1">
+        </div>
+      </div>
+      
+    </div>
+  </div>
 
   <!-- JavaScript Libraries and Coordinates -->
   <script src="js/canvas.js"></script>

@@ -43,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const visualizerWave = document.getElementById('speech-wave');
   const visualizerStatus = document.getElementById('visualizer-status-text');
   const visualizerStatusDot = document.getElementById('visualizer-status-dot');
+    
+  // Settings Drawer Toggle Controls
+  const btnOpenSettings = document.getElementById('btn-open-settings');
+  const btnCloseSettings = document.getElementById('btn-close-settings');
+  const settingsDrawer = document.getElementById('settings-drawer');
   
   // --- State Variables ---
   let canvas = null;
@@ -90,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Modules
   canvas = new window.HandwritingCanvas(canvasEl, canvasContainer, handleStrokeEnd);
+  canvas.setPaperType('ruled-paper'); // Ensure lighter ruled paper starts by default!
   recognizer = new window.HandwritingRecognizer(handleNetworkChange);
   
   // Check initial connection status
@@ -462,6 +468,24 @@ document.addEventListener('DOMContentLoaded', () => {
   volumeSlider.addEventListener('input', (e) => {
     volumeValue.textContent = Math.round(e.target.value * 100) + '%';
   });
+
+    // Settings Drawer Open/Close Events
+    const drawerOverlay = document.createElement('div');
+    drawerOverlay.className = 'drawer-overlay';
+    document.body.appendChild(drawerOverlay);
+
+    btnOpenSettings.addEventListener('click', () => {
+      settingsDrawer.classList.add('open');
+      drawerOverlay.classList.add('open');
+    });
+
+    const closeSettings = () => {
+      settingsDrawer.classList.remove('open');
+      drawerOverlay.classList.remove('open');
+    };
+
+    btnCloseSettings.addEventListener('click', closeSettings);
+    drawerOverlay.addEventListener('click', closeSettings);
 
   // Copy recognized text
   copyBtn.addEventListener('click', () => {

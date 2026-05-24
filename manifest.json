@@ -4,8 +4,8 @@
   "description": "Convert handwriting into speech using state-of-the-art drawing canvas and real-time offline speech synthesis.",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#070a13",
-  "theme_color": "#070a13",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
   "orientation": "any",
   "categories": ["utilities", "productivity", "accessibility"],
   "icons": [
