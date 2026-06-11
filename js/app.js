@@ -52,11 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(autoRecognizeTimer);
     }
     
-    // Trigger translation 2.0s after drawing stops
+    // Trigger translation 5.0s after drawing stops
     if (isAutoRecognizeEnabled) {
       autoRecognizeTimer = setTimeout(() => {
         triggerRecognition();
-      }, 2000);
+      }, 5000);
     }
   };
 
